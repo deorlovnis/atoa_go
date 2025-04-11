@@ -1,29 +1,122 @@
-# atoa_go 🤖-🤖
+# AtoaGo – Agent SDK for Atoa Collaboration Platform
 
-**atoa_go** is an open source Go library designed to help developers build, connect, and manage third-party software agents. It focuses on security, reliability and authenticity of such interaction between independent parties and the agents that represent them.
+AtoaGo is a lightweight Go client SDK designed to help autonomous agents securely authenticate and interact with the Atoa platform, using A2A protocol structures.
+
+This SDK does **not** include backend registry or matchmaking logic — it’s designed for third-party agents to integrate seamlessly with Atoa’s public APIs.
+
+> 🧠 **Note:** This library is inspired by and aligned with Google's [A2A (Agent-to-Agent) Protocol](https://github.com/google/A2A). It serves as a Go implementation of concepts proposed by Google for secure agent interactions.
+
+## 🌐 Use Cases
+- Authenticate using public key or DID
+- Request and cache JWT access tokens
+- Parse and construct A2A Offers, Sessions, and Messages
+- Send messages within authenticated A2A sessions
+
+## ✨ Features
+- 🔐 Challenge-response auth with self-issued keys or `did:web`
+- 📦 Typed A2A message models: Offer, Session, Message
+- ⚙️ Easy integration with HTTP clients
+- 🧪 Example CLI agent for quick testing
 
 ---
 
-## 🎯 Mission
-
-To make it easy for developers to build secure and reliable connections between third-party agents using well-defined interaction protocols and a centralized coordination layer.
-
-Modern systems are increasingly composed of autonomous software agents — representing services, organizations, or users — that need to discover each other, negotiate interactions, and collaborate without tight coupling.
-
-I saw a need for high speed solutions in this area that a go language can help with.
+## 🔧 Installation
+```bash
+go get github.com/deorlovnis/atoa_go
+```
 
 ---
 
-## 🔧 Features
+## 🧰 Quick Start
 
-`atoa_go` helps developers solve this problem by providing:
+```go
+agent := atoa.GenerateKeyPair()
+client := atoa.NewClient("https://atoamarket.org", agent)
 
-- ✅ A consistent framework for agent registration and identity  
-- 🔐 Protocol support for secure session establishment  
-- 🔍 Tools for offer discovery, matching, and session orchestration  
-- 🧩 Extensible interfaces for evolving standards like MCP and A2A  
+err := client.Authenticate()
+if err != nil {
+  log.Fatalf("Auth failed: %v", err)
+}
+
+msg := atoa.A2AMessage{
+  SessionID: "sess-123",
+  FromAgentID: agent.AgentID,
+  ToAgentID: "agent-B",
+  Type: "text",
+  Payload: json.RawMessage(`"Hello world!"`),
+  Timestamp: time.Now(),
+}
+client.SendMessage(msg)
+```
+
+---
+
+## 🧬 Identity Modes
+### Option A: Direct Key Registration (PoC-Friendly)
+- Agent uploads its public key
+- Platform temporarily trusts agent's `org_id` as self-declared
+- No third-party validation required
+
+### Option B: DID + Org Domain Binding
+- Agent uses a DID identifier, e.g. `did:web:agent.org`
+- Platform fetches and verifies `https://agent.org/.well-known/did.json`
+- Must match public key and domain to claimed `org_id`
+
+---
+
+## 🔐 Authentication Flow
+1. Agent calls `Register()` with its public key (and optional DID doc URL)
+2. Platform returns a challenge
+3. Agent signs the challenge with its private key
+4. Agent calls `RequestToken()` with signed challenge
+5. Platform responds with a JWT access token
+
+The token is stored by the client and used in all requests as:
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## 🧪 Example Agent (CLI)
+See `examples/demo_agent.go` for a basic test agent that:
+- Generates a keypair
+- Authenticates with the platform
+- Sends a message within a session
+
+```bash
+go run examples/demo_agent.go --base https://atoa.market --agent agent-A --org org-X
+```
+
+---
+
+## 📁 Folder Structure
+```
+atoa_go/
+├── internal/
+│   ├── crypto/       # Keygen, signing, DID checks
+│   ├── auth/         # Auth flow and token logic
+│   └── protocol/     # Offer, Session, Message models
+├── client/           # Main AtoaClient entry point
+├── examples/         # CLI agent demo
+└── README.md
+```
+
+---
+
+## 🚧 Limitations
+- No persistent token store yet
+- DID support is optional and basic
+- No session discovery or offer search
+
+---
+
+## 📄 License
+MIT
+
+---
+
+## 🤝 Contributing
+We welcome PRs for example agents, custom transports, or model improvements. See CONTRIBUTING.md for details.
 
 
-## Contact
-
-feel free to contact me if agent-to-agent sounds interesting for you
