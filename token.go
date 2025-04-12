@@ -90,7 +90,7 @@ func IssueAgentToken(card *AgentCard, orgToken string, privateKey *ecdsa.Private
 // ParseOrgToken parses and validates an organization JWT token
 func ParseOrgToken(tokenString string) (*OrgTokenClaims, error) {
 	// First parse without verification to get the public key
-	token, _, err := jwt.NewParser().ParseUnverified(tokenString, &OrgTokenClaims{})
+	_, _, err := jwt.NewParser().ParseUnverified(tokenString, &OrgTokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
@@ -98,7 +98,7 @@ func ParseOrgToken(tokenString string) (*OrgTokenClaims, error) {
 	// TODO: Get the public key from a trusted source using keyID from token.Header["kid"]
 	// For now, we'll just parse the claims without verification
 	parser := jwt.NewParser(jwt.WithExpirationRequired(), jwt.WithIssuedAt())
-	token, err = parser.ParseWithClaims(tokenString, &OrgTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := parser.ParseWithClaims(tokenString, &OrgTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -122,7 +122,7 @@ func ParseOrgToken(tokenString string) (*OrgTokenClaims, error) {
 // ParseAgentTokenClaims parses and validates an agent JWT token
 func ParseAgentTokenClaims(tokenString string) (*AgentTokenClaims, error) {
 	// First parse without verification to get the public key
-	token, _, err := jwt.NewParser().ParseUnverified(tokenString, &AgentTokenClaims{})
+	_, _, err := jwt.NewParser().ParseUnverified(tokenString, &AgentTokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse token: %w", err)
 	}
@@ -130,7 +130,7 @@ func ParseAgentTokenClaims(tokenString string) (*AgentTokenClaims, error) {
 	// TODO: Get the public key from a trusted source using keyID from token.Header["kid"]
 	// For now, we'll just parse the claims without verification
 	parser := jwt.NewParser(jwt.WithExpirationRequired(), jwt.WithIssuedAt())
-	token, err = parser.ParseWithClaims(tokenString, &AgentTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := parser.ParseWithClaims(tokenString, &AgentTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}

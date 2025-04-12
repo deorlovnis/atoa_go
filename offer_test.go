@@ -243,18 +243,29 @@ func TestCreateSession(t *testing.T) {
 
 			// Test CreateSession
 			session, err := client.CreateSession(context.Background(), tt.offerID)
-			if (err != nil) != tt.wantErr {
+
+			// Case 1: We expect an error
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("CreateSession() error = nil, wantErr %v", tt.wantErr)
+				}
+				return
+			}
+
+			// Case 2: We got an unexpected error
+			if err != nil {
 				t.Errorf("CreateSession() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
-			if !tt.wantErr {
-				if session == nil {
-					t.Error("CreateSession() returned nil session")
-				}
-				if session.SessionID == "" {
-					t.Error("CreateSession() returned session with empty ID")
-				}
+			// Case 3: Success case - validate session
+			if session == nil {
+				t.Error("CreateSession() returned nil session")
+				return
+			}
+
+			if session.SessionID == "" {
+				t.Error("CreateSession() returned empty session ID")
 			}
 		})
 	}
