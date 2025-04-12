@@ -14,10 +14,10 @@ I saw a need for high speed solutions in this area that a go language can help w
 
 atoa_go helps developers solve this problem by providing:
 
-✅ A consistent framework for agent registration and identity
-🔐 Protocol support for secure session establishment
-🔍 Tools for offer discovery, matching, and session orchestration
-🧩 Extensible interfaces for evolving standards like MCP and A2A
+- ✅ A consistent framework for agent registration and identity
+- 🔐 Protocol support for secure session establishment
+- 🔍 Tools for offer discovery, matching, and session orchestration
+- 🧩 Extensible interfaces for evolving standards like MCP and A2A
 
 ## Contact
 

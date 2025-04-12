@@ -99,8 +99,11 @@ func (c *OrgClient) RequestToken(orgID, challenge, signature string) (string, er
 
 // AgentClient handles agent registration and authentication
 type AgentClient struct {
-	BaseURL string
-	HTTP    *http.Client
+	AgentCard AgentCard
+	OrgToken  string
+	Token     string
+	BaseURL   string
+	HTTP      *http.Client
 }
 
 // NewAgentClient creates a new AgentClient with the given base URL
