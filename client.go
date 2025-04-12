@@ -2,10 +2,8 @@ package atoa
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -186,49 +184,6 @@ func (c *AgentClient) JoinSession(sessionID, agentToken string) error {
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("join failed with status %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-// SendMessage sends an A2A message to a session
-func (c *AgentClient) SendMessage(ctx context.Context, msg A2AMessage) error {
-	// Validate message fields
-	if msg.SessionID == "" || msg.FromAgentID == "" || msg.ToAgentID == "" || msg.Type == "" || msg.Payload == nil {
-		return fmt.Errorf("missing required message fields")
-	}
-
-	// Create request
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL+"/messages", nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	// Set authorization header
-	if c.Token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.Token)
-	}
-
-	// Set content type
-	req.Header.Set("Content-Type", "application/json")
-
-	// Marshal message to JSON
-	body, err := json.Marshal(msg)
-	if err != nil {
-		return fmt.Errorf("failed to marshal message: %w", err)
-	}
-	req.Body = io.NopCloser(bytes.NewReader(body))
-
-	// Send request
-	resp, err := c.HTTP.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// Check response status
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	return nil
